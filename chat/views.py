@@ -3,6 +3,8 @@ from django.contrib.auth import authenticate, login, logout
 from rest_framework.views import APIView
 from rest_framework.response import Response
 from rest_framework import status
+from rest_framework.decorators import permission_classes
+from rest_framework.permissions import IsAuthenticated
 
 from rest_framework_simplejwt.serializers import TokenObtainPairSerializer
 from rest_framework_simplejwt.views import TokenObtainPairView
@@ -30,8 +32,18 @@ def get_tokens_for_user(user):
     return {
         "refresh": str(refresh),
         "access": str(refresh.access_token),
-        "username": str(user.username),
     }
+
+class UserAPIView(APIView):
+    permission_classes = [IsAuthenticated]
+    def get(self, request):
+        try:
+            user_obj = NewUser.objects.exclude(id=request.user.id)
+            serializer = UserSerializer(user_obj, many=True)
+            return Response(serializer.data, status=status.HTTP_200_OK)
+        except Exception as e:
+            print("error in getting users list", str(e))
+            return Response({"error":"Error in getting users list"}, status=status.HTTP_400_BAD_REQUEST)
 
 class RegisterAPIView(APIView):
     def post(self, request):
@@ -53,7 +65,16 @@ class LoginAPIView(APIView):
             if user is not None:
                 login(request, user)
                 tokens = get_tokens_for_user(user)
-                return Response({"tokens": tokens}, status=status.HTTP_200_OK)
+                user_data = {
+                    "username": user.username,
+                    "email": user.email,
+                    "image": user.image.url if user.image else None
+                }
+                response_data = {
+                    "tokens": tokens,
+                    "user": user_data,
+                }
+                return Response(response_data, status=status.HTTP_200_OK)
             else:
                 return Response("Email or Password is not valid", status=status.HTTP_400_BAD_REQUEST)
         return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)

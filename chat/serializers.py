@@ -1,6 +1,12 @@
 from rest_framework import serializers
 
-from .models import NewUser
+from .models import NewUser, OnlineUser, ChatRoom, ChatMessage
+
+class UserSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = NewUser
+        fields = ["id", "image", "username", "email"]
+        extra_kwargs = {"id": {"read_only": True}}
 
 class UserRegistrationSerializer(serializers.ModelSerializer):
     password2 = serializers.CharField(
@@ -32,3 +38,6 @@ class UserLoginSerializer(serializers.ModelSerializer):
     class Meta:
         model = NewUser
         fields = ["email", "password"]
+
+class ChatRoomSerializer(serializers.ModelSerializer):
+    pass

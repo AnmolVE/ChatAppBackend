@@ -3,6 +3,7 @@ from django.utils import timezone
 from django.utils.translation import gettext_lazy as _
 from django.contrib.auth.models import AbstractBaseUser, PermissionsMixin, BaseUserManager
 from django.utils.html import mark_safe
+from shortuuidfield import ShortUUIDField
 
 
 class CustomAccountManager(BaseUserManager):
@@ -58,3 +59,27 @@ class NewUser(AbstractBaseUser, PermissionsMixin):
         if self.image:
             return mark_safe('<img src="{}" width="50" height="50" />'.format(self.image.url))
         return "No Image"
+
+class OnlineUser(models.Model):
+	user = models.OneToOneField(NewUser, on_delete=models.CASCADE)
+
+	def __str__(self):
+		return self.user.username
+
+class ChatRoom(models.Model):
+     roomId = ShortUUIDField()
+     type = models.CharField(max_length=10, default="DM")
+     member = models.ManyToManyField(NewUser)
+     name = models.CharField(max_length=20, null=True, blank=True, unique=True)
+
+     def __str__(self):
+          return self.roomId + " -> " + str(self.name)
+    
+class ChatMessage(models.Model):
+     chat = models.ForeignKey(ChatRoom, on_delete=models.SET_NULL, null=True)
+     user = models.ForeignKey(NewUser, on_delete=models.SET_NULL, null=True)
+     message = models.CharField(max_length=255)
+     timestamp = models.DateTimeField(auto_now_add=True)
+
+     def __str__(self):
+          return self.message

@@ -2,6 +2,9 @@ from django.contrib import admin
 
 from .models import (
     NewUser,
+    OnlineUser,
+    ChatRoom,
+    ChatMessage,
 )
 
 from django.contrib.auth.admin import UserAdmin
@@ -42,3 +45,6 @@ class UserAdminConfig(UserAdmin):
     ordering = ("-start_date",)
 
 admin.site.register(NewUser, UserAdminConfig)
+admin.site.register(OnlineUser)
+admin.site.register(ChatRoom)
+admin.site.register(ChatMessage)

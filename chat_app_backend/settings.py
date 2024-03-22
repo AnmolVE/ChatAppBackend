@@ -33,6 +33,7 @@ ALLOWED_HOSTS = []
 # Application definition
 
 INSTALLED_APPS = [
+    "daphne",
     'django.contrib.admin',
     'django.contrib.auth',
     'django.contrib.contenttypes',
@@ -42,6 +43,7 @@ INSTALLED_APPS = [
     "chat",
     "rest_framework",
     "rest_framework_simplejwt.token_blacklist",
+    "corsheaders",
 ]
 
 REST_FRAMEWORK = {
@@ -51,7 +53,7 @@ REST_FRAMEWORK = {
 }
 
 SIMPLE_JWT = {
-    "ACCESS_TOKEN_LIFETIME": timedelta(minutes=5),
+    "ACCESS_TOKEN_LIFETIME": timedelta(minutes=50),
     "REFRESH_TOKEN_LIFETIME": timedelta(days=1),
     "ROTATE_REFRESH_TOKENS": True,
     "BLACKLIST_AFTER_ROTATION": True,
@@ -85,6 +87,7 @@ SIMPLE_JWT = {
 
 MIDDLEWARE = [
     'django.middleware.security.SecurityMiddleware',
+    "corsheaders.middleware.CorsMiddleware",
     'django.contrib.sessions.middleware.SessionMiddleware',
     'django.middleware.common.CommonMiddleware',
     'django.middleware.csrf.CsrfViewMiddleware',
@@ -111,7 +114,15 @@ TEMPLATES = [
     },
 ]
 
-WSGI_APPLICATION = 'chat_app_backend.wsgi.application'
+# WSGI_APPLICATION = 'chat_app_backend.wsgi.application'
+ASGI_APPLICATION = "chat_app_backend.asgi.application"
+
+CHANNEL_LAYER = {
+    "default": {
+        "BACKEND": "channels_redis.core.RedisChannelLayer",
+        "CONFIG": {"hosts": [("localhost", 6379)]},
+    }
+}
 
 
 # Database
@@ -182,3 +193,5 @@ AUTH_USER_MODEL = "chat.NewUser"
 # https://docs.djangoproject.com/en/5.0/ref/settings/#default-auto-field
 
 DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
+
+CORS_ALLOW_ALL_ORIGINS = True
